@@ -10,7 +10,7 @@ import net.simonvt.schematic.annotation.References;
  */
 public interface VideoColumns {
 
-    @DataType(DataType.Type.INTEGER) @PrimaryKey
+    @DataType(DataType.Type.TEXT) @PrimaryKey
     public static final String _ID = "_id";
     @DataType(DataType.Type.INTEGER) @References(table = MovieDatabase.Tables.MOVIE, column = MovieColumns._ID) String MOVIE_ID =
             "movieId";

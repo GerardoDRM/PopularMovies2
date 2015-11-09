@@ -45,7 +45,7 @@ public class DatabaseHelperOp {
 
     }
 
-    private void deleteMovie(Movie mMovie, Context context) {
+    public static void deleteMovie(Movie mMovie, Context context) {
         Log.d(LOG_TAG, "delete");
         ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>();
 
@@ -71,13 +71,14 @@ public class DatabaseHelperOp {
         }
     }
 
-    private void insertBulkReviews(List<Review> mReviews, Context context) {
+    public static void insertBulkReviews(List<Review> mReviews, Context context, Long id) {
         ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>();
 
         for(Review review : mReviews) {
             ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(
                     MovieProvider.Reviews.CONTENT_URI);
             builder.withValue(ReviewColumns._ID, review.getId());
+            builder.withValue(ReviewColumns.MOVIE_ID, id);
             builder.withValue(ReviewColumns.AUTHOR, review.getAuthor());
             builder.withValue(ReviewColumns.CONTENT, review.getContent());
             batchOperations.add(builder.build());
@@ -92,12 +93,13 @@ public class DatabaseHelperOp {
 
     }
 
-    private void insertBulkVideos(List<Video> mVideos, Context context) {
+    public static void insertBulkVideos(List<Video> mVideos, Context context, Long id) {
         ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>();
         for(Video video : mVideos) {
             ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(
                     MovieProvider.Videos.CONTENT_URI);
             builder.withValue(VideoColumns._ID, video.getKey());
+            builder.withValue(VideoColumns.MOVIE_ID, id);
             builder.withValue(VideoColumns.NAME, video.getName());
             batchOperations.add(builder.build());
         }

@@ -41,10 +41,13 @@ public class MovieCursorAdapter extends CursorRecyclerViewAdapter<MovieCursorAda
         Picasso.with(mContext).load("http://image.tmdb.org/t/p/w185/" + cursor.getString(
                 cursor.getColumnIndex(MovieColumns.POSTER)
         )).into(viewHolder.moviePoster);
+        final int id = cursor.getInt(
+                cursor.getColumnIndex(MovieColumns._ID));
         viewHolder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((MainFragment.CallbackMovie) mContext).onFavoriteSelected(MovieProvider.Movies.withId(cursor.getInt(cursor.getColumnIndex(MovieColumns._ID))));
+                ((MainFragment.CallbackMovie) mContext).onFavoriteSelected(
+                        MovieProvider.Movies.withId(id));
             }
         });
     }

@@ -35,6 +35,7 @@ import app.gerardo.popularmovies2.API.MoviesApi;
 import app.gerardo.popularmovies2.data.DatabaseHelperOp;
 import app.gerardo.popularmovies2.data.MovieColumns;
 import app.gerardo.popularmovies2.data.MovieProvider;
+import app.gerardo.popularmovies2.data.ReviewColumns;
 import app.gerardo.popularmovies2.model.Movie;
 import app.gerardo.popularmovies2.model.MovieResult;
 import app.gerardo.popularmovies2.model.Review;
@@ -66,7 +67,8 @@ public class DetailsMovieActivityFragment extends Fragment implements LoaderMana
     private List<Video> mVideos;
     private Uri mUri;
     private static final int DETAIL_LOADER = 0;
-    private String mMovieId;
+    private int mMovieId;
+    private FloatingActionButton mFloatingButton;
 
     private AppCompatActivity appCompatActivity;
 
@@ -129,19 +131,25 @@ public class DetailsMovieActivityFragment extends Fragment implements LoaderMana
         mDescriptionText = (TextView) rootView.findViewById(R.id.overview_data);
         mDateText = (TextView) rootView.findViewById(R.id.release_date_data);
 
-        final FloatingActionButton mFloatingButton = (FloatingActionButton) rootView.findViewById(R.id.fab);
+
+        mFloatingButton = (FloatingActionButton) rootView.findViewById(R.id.fab);
         mFloatingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Cursor movie = getActivity().getContentResolver().query(MovieProvider.Movies.withId(mMovie.getId()),
                         null, null, null, null);
                 if(movie.getCount() == 0) {
-                    mFloatingButton.setColorFilter(0xffffffff, PorterDuff.Mode.MULTIPLY);
+                    mFloatingButton.setColorFilter(0xffff0000, PorterDuff.Mode.MULTIPLY);
                     DatabaseHelperOp.insertMovie(mMovie, getActivity());
-
+                    if(mReviews != null && mReviews.size() > 0) {
+                        DatabaseHelperOp.insertBulkReviews(mReviews, getActivity(), mMovie.getId());
+                    }
+                    if(mVideos != null && mVideos.size() > 0 ) {
+                        DatabaseHelperOp.insertBulkVideos(mVideos, getActivity(), mMovie.getId());
+                    }
                 }
                 else {
-                    mFloatingButton.setColorFilter(0xffff0000, PorterDuff.Mode.MULTIPLY);
+                    mFloatingButton.setColorFilter(0xffffffff, PorterDuff.Mode.MULTIPLY);
 
                 }
 
@@ -177,11 +185,21 @@ public class DetailsMovieActivityFragment extends Fragment implements LoaderMana
         return rootView;
     }
 
+    public void checkStoredMovie(Long id) {
+        Cursor movie = getActivity().getContentResolver().query(MovieProvider.Movies.withId(id),
+                null, null, null, null);
+        if(movie.getCount() > 0) {
+            mFloatingButton.setColorFilter(0xffff0000, PorterDuff.Mode.MULTIPLY);
+        }
+    }
+
 
     public void showMovieInfo() {
         getGeneralInfo();
         getMoviesTrailers();
         getMovieReviews();
+        checkStoredMovie(mMovie.getId());
+
     }
 
     public void getFirstMovie() {
@@ -200,6 +218,7 @@ public class DetailsMovieActivityFragment extends Fragment implements LoaderMana
                 MovieResult movieResult = response.body();
                 mMovie = movieResult.getResults().get(0);
                 showMovieInfo();
+                checkStoredMovie(mMovie.getId());
 
             }
 
@@ -258,6 +277,7 @@ public class DetailsMovieActivityFragment extends Fragment implements LoaderMana
 
                 LinearLayout viewGroup = (LinearLayout) getActivity().findViewById(R.id.reviews_layout);
 
+                mReviews = reviewResult.getResults();
                 for (final Review r : reviewResult.getResults()) {
                     View review = getActivity().getLayoutInflater().inflate(R.layout.items_review, null);
                     TextView mAuthor = (TextView) review.findViewById(R.id.author_label);
@@ -297,6 +317,7 @@ public class DetailsMovieActivityFragment extends Fragment implements LoaderMana
                 VideoResult movieResult = response.body();
                 LinearLayout viewGroup = (LinearLayout) getActivity().findViewById(R.id.trailers_layout);
 
+                mVideos = movieResult.getResults();
                 for (final Video v : movieResult.getResults()) {
                     View trailer = getActivity().getLayoutInflater().inflate(R.layout.items_video, null);
                     TextView mTrailerName = (TextView) trailer.findViewById(R.id.trailer_name);
@@ -341,7 +362,7 @@ public class DetailsMovieActivityFragment extends Fragment implements LoaderMana
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if ( null != mUri ) {
-            Log.d("OncreateLoader", "Create");
+            Log.d("OncreateLoader", mUri.toString());
             // Now create and return a CursorLoader that will take care of
             // creating a Cursor for the data being displayed.
             return new CursorLoader(
@@ -359,8 +380,8 @@ public class DetailsMovieActivityFragment extends Fragment implements LoaderMana
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if (data != null && data.moveToFirst()) {
-            Log.d("onLoadFinished", "Create");
-
+            Log.d("onLoadFinished", data.getString(data.getColumnIndex(MovieColumns.TITLE)));
+            mFloatingButton.setColorFilter(0xffff0000, PorterDuff.Mode.MULTIPLY);
             // Adding title
             mMovieTitle.setText(data.getString(data.getColumnIndex(MovieColumns.TITLE)));
             // Adding image with Picasso and changing color to status bar and collapse
@@ -387,6 +408,37 @@ public class DetailsMovieActivityFragment extends Fragment implements LoaderMana
             mDateText.setText(data.getString(
                     data.getColumnIndex(MovieColumns.DATE)
             ));
+
+            Cursor reviews = getActivity().getContentResolver().query(
+                    MovieProvider.Reviews.withId(data.getInt(data.getColumnIndex(MovieColumns._ID))),
+                    null, null, null, null);
+            LinearLayout viewGroup = (LinearLayout) getActivity().findViewById(R.id.reviews_layout);
+
+            if(reviews != null && reviews.moveToFirst()) {
+                for(int i=0; i<reviews.getCount(); i++) {
+                    View review = getActivity().getLayoutInflater().inflate(R.layout.items_review, null);
+                    TextView mAuthor = (TextView) review.findViewById(R.id.author_label);
+                    mAuthor.setText(reviews.getString(reviews.getColumnIndex(ReviewColumns.AUTHOR)));
+                    TextView mContent = (TextView) review.findViewById(R.id.content_label);
+                    mContent.setText(reviews.getString(reviews.getColumnIndex(ReviewColumns.CONTENT)));
+                    viewGroup.addView(review);
+
+                    review.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Toast.makeText(getActivity(), "TEST", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+                reviews.close();
+            }
+            Cursor videos = getActivity().getContentResolver().query(
+                    MovieProvider.Videos.withId(data.getInt(data.getColumnIndex(MovieColumns._ID))),
+                    null, null, null, null);
+            if(videos != null && videos.moveToFirst()) {
+                Log.d("Videos", videos.getCount() + "");
+                videos.close();
+            }
 
         }
 

@@ -64,7 +64,7 @@ public final class MovieProvider {
                 name = "REVIEW_ID",
                 path = Path.REVIEWS + "/#",
                 type = "vnd.android.cursor.item/reviews",
-                whereColumn = ReviewColumns._ID,
+                whereColumn = ReviewColumns.MOVIE_ID,
                 pathSegment = 1)
         public static Uri withId(long id){
             return buildUri(Path.REVIEWS, String.valueOf(id));
@@ -82,7 +82,7 @@ public final class MovieProvider {
                 name = "VIDEO_ID",
                 path = Path.VIDEOS + "/#",
                 type = "vnd.android.cursor.item/videos",
-                whereColumn = ReviewColumns._ID,
+                whereColumn = ReviewColumns.MOVIE_ID,
                 pathSegment = 1)
         public static Uri withId(long id){
             return buildUri(Path.VIDEOS, String.valueOf(id));

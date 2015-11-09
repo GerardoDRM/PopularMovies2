@@ -9,7 +9,7 @@ import net.simonvt.schematic.annotation.References;
  * Created by Gerardo de la Rosa on 25/10/15.
  */
 public interface ReviewColumns {
-    @DataType(DataType.Type.INTEGER) @PrimaryKey
+    @DataType(DataType.Type.TEXT) @PrimaryKey
     public static final String _ID = "_id";
     @DataType(DataType.Type.INTEGER) @References(table = MovieDatabase.Tables.MOVIE, column = MovieColumns._ID) String MOVIE_ID =
             "movieId";
