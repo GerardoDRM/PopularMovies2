@@ -16,7 +16,7 @@ public final class MovieDatabase {
 
     public static class Tables {
         @Table(MovieColumns.class) public static final String MOVIE = "movies";
-        @Table(MovieDatabase.class) public static final String REVIEW = "reviews";
-        @Table(MovieDatabase.class) public static final String VIDEO = "videos";
+        @Table(ReviewColumns.class) public static final String REVIEW = "reviews";
+        @Table(VideoColumns.class) public static final String VIDEO = "videos";
     }
 }

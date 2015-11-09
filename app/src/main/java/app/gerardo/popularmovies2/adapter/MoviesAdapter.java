@@ -1,8 +1,6 @@
 package app.gerardo.popularmovies2.adapter;
 
 import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +12,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-import app.gerardo.popularmovies2.DetailsMovieActivity;
+import app.gerardo.popularmovies2.MainFragment;
 import app.gerardo.popularmovies2.R;
 import app.gerardo.popularmovies2.model.Movie;
 
@@ -45,11 +43,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(mContext, DetailsMovieActivity.class);
-                Bundle mBundle = new Bundle();
-                mBundle.putParcelable("MOVIE", mMovies.get(position));
-                intent.putExtras(mBundle);
-                mContext.startActivity(intent);
+                ((MainFragment.CallbackMovie)mContext).onItemSelected(mMovies.get(position));
             }
         });
     }

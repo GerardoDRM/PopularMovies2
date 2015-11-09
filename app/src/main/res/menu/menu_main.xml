@@ -1,12 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <group android:checkableBehavior="single">
         <item android:id="@+id/popularity_radio"
             android:title="@string/popularity_label"
-            android:checked="true"/>
+            android:checked="true"
+            app:showAsAction="never" />
         <item android:id="@+id/votes_radio"
-            android:title="@string/high_rate" />
+            android:title="@string/high_rate"
+            app:showAsAction="never" />
         <item android:id="@+id/favorites"
-            android:title="@string/favorites" />
+            android:title="@string/favorites"
+            app:showAsAction="never" />
     </group>
 </menu>

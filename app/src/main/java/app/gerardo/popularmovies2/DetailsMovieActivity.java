@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 public class DetailsMovieActivity extends AppCompatActivity {
-    private final String MAIN_FRAGMENT = "MOVIE_FRAGMENT_DETAILS";
+    private final String DETAILS_FRAGMENT = "MOVIE_FRAGMENT_DETAILS";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -13,7 +13,7 @@ public class DetailsMovieActivity extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_details, new DetailsMovieActivityFragment(), MAIN_FRAGMENT)
+                    .add(R.id.fragment_details, new DetailsMovieActivityFragment(), DETAILS_FRAGMENT)
                     .commit();
         }
     }

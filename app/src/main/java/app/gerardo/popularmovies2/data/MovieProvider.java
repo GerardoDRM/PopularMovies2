@@ -1,15 +1,10 @@
 package app.gerardo.popularmovies2.data;
 
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.Cursor;
 import android.net.Uri;
 
 import net.simonvt.schematic.annotation.ContentProvider;
 import net.simonvt.schematic.annotation.ContentUri;
 import net.simonvt.schematic.annotation.InexactContentUri;
-import net.simonvt.schematic.annotation.NotifyDelete;
-import net.simonvt.schematic.annotation.NotifyInsert;
 import net.simonvt.schematic.annotation.TableEndpoint;
 
 /**
@@ -24,8 +19,8 @@ public final class MovieProvider {
 
     interface Path{
         String MOVIES = "movies";
-//        String VIDEOS = "videos";
-//        String REVIEWS = "reviews";
+        String VIDEOS = "videos";
+        String REVIEWS = "reviews";
     }
 
     private static Uri buildUri(String ... paths){
@@ -35,6 +30,7 @@ public final class MovieProvider {
         }
         return builder.build();
     }
+
 
 
     @TableEndpoint(table = MovieDatabase.Tables.MOVIE) public static class Movies{
@@ -54,85 +50,44 @@ public final class MovieProvider {
             return buildUri(Path.MOVIES, String.valueOf(id));
         }
 
-        @NotifyInsert(paths = Path.MOVIES) public static Uri[] onInsert(ContentValues values) {
-            final long listId = values.getAsLong(MovieColumns._ID);
-            final String title = values.getAsString(MovieColumns.TITLE);
-            final String poster = values.getAsString(MovieColumns.POSTER);
-            final String back_poster = values.getAsString(MovieColumns.BACK_POSTER);
-            final Double popularity = values.getAsDouble(MovieColumns.POPULARITY);
-            final Double votes = values.getAsDouble(MovieColumns.VOTE);
-
-            return new Uri[] {
-                    withId(listId)
-            };
-        }
-
-        @NotifyDelete(paths = Path.MOVIES + "/#") public static Uri[] onDelete(Context context,
-                                                                              Uri uri) {
-            final long noteId = Long.valueOf(uri.getPathSegments().get(1));
-            Cursor c = context.getContentResolver().query(uri, null, null, null, null);
-            c.moveToFirst();
-            final long listId = c.getLong(c.getColumnIndex(MovieColumns._ID));
-            c.close();
-
-            return new Uri[] {
-                    withId(noteId)
-            };
-        }
     }
 
 
-//    // Review actions
-//    @TableEndpoint(table = MovieDatabase.Tables.REVIEW) public static class Reviews{
-//        @ContentUri(
-//                path = Path.REVIEWS,
-//                type = "vnd.android.cursor.dir/reviews")
-//        public static final Uri CONTENT_URI = buildUri(Path.REVIEWS);
-//
-//        @InexactContentUri(
-//                name = "MOVIE_ID",
-//                path = Path.REVIEWS + "/#",
-//                type = "vnd.android.cursor.item/reviews",
-//                whereColumn = ReviewColumns._ID,
-//                pathSegment = 1)
-//        public static Uri withId(long id){
-//            return buildUri(Path.REVIEWS, String.valueOf(id));
-//        }
-//
-//        @NotifyInsert(paths = Path.REVIEWS) public static Uri[] onInsert(ContentValues values) {
-//            final long id = values.getAsLong(ReviewColumns._ID);
-//            final String movie_id = values.getAsString(ReviewColumns.MOVIE_ID);
-//            final String author = values.getAsString(ReviewColumns.AUTHOR);
-//            final String content = values.getAsString(ReviewColumns.CONTENT);
-//
-//
-//            return new Uri[] {
-//                    withId(id)
-//            };
-//        }
-//
-//        @NotifyBulkInsert(paths = Path.REVIEWS)
-//        public static Uri[] onBulkInsert(Context context, Uri uri, ContentValues[] values, long[] ids) {
-//            return new Uri[] {
-//                    uri,
-//            };
-//        }
-//
-//        @NotifyDelete(paths = Path.REVIEWS + "/#") public static Uri[] onDelete(Context context,
-//                                                                               Uri uri) {
-//            final long noteId = Long.valueOf(uri.getPathSegments().get(1));
-//            Cursor c = context.getContentResolver().query(uri, null, null, null, null);
-//            c.moveToFirst();
-//            final long listId = c.getLong(c.getColumnIndex(MovieColumns._ID));
-//            c.close();
-//
-//            return new Uri[] {
-//                    withId(noteId)
-//            };
-//        }
-//    }
+    // Review actions
+    @TableEndpoint(table = MovieDatabase.Tables.REVIEW) public static class Reviews{
+        @ContentUri(
+                path = Path.REVIEWS,
+                type = "vnd.android.cursor.dir/reviews")
+        public static final Uri CONTENT_URI = buildUri(Path.REVIEWS);
+
+        @InexactContentUri(
+                name = "REVIEW_ID",
+                path = Path.REVIEWS + "/#",
+                type = "vnd.android.cursor.item/reviews",
+                whereColumn = ReviewColumns._ID,
+                pathSegment = 1)
+        public static Uri withId(long id){
+            return buildUri(Path.REVIEWS, String.valueOf(id));
+        }
+    }
 
     // Trailer actions
+    @TableEndpoint(table = MovieDatabase.Tables.VIDEO) public static class Videos{
+        @ContentUri(
+                path = Path.VIDEOS,
+                type = "vnd.android.cursor.dir/videos")
+        public static final Uri CONTENT_URI = buildUri(Path.VIDEOS);
+
+        @InexactContentUri(
+                name = "VIDEO_ID",
+                path = Path.VIDEOS + "/#",
+                type = "vnd.android.cursor.item/videos",
+                whereColumn = ReviewColumns._ID,
+                pathSegment = 1)
+        public static Uri withId(long id){
+            return buildUri(Path.VIDEOS, String.valueOf(id));
+        }
+    }
 
 
 }
