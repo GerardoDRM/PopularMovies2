@@ -46,7 +46,7 @@ public final class MovieProvider {
                 type = "vnd.android.cursor.item/movies",
                 whereColumn = MovieColumns._ID,
                 pathSegment = 1)
-        public static Uri withId(long id){
+        public static Uri withId(long id) {
             return buildUri(Path.MOVIES, String.valueOf(id));
         }
 

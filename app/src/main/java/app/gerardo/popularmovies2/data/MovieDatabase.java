@@ -12,7 +12,7 @@ public final class MovieDatabase {
 
     private MovieDatabase(){}
 
-    public static final int VERSION = 1;
+    public static final int VERSION = 2;
 
     public static class Tables {
         @Table(MovieColumns.class) public static final String MOVIE = "movies";

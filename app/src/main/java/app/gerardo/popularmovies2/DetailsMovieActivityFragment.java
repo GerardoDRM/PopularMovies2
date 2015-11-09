@@ -1,13 +1,12 @@
 package app.gerardo.popularmovies2;
 
-import android.content.ContentProviderOperation;
 import android.content.Intent;
-import android.content.OperationApplicationException;
 import android.database.Cursor;
+import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -30,14 +29,12 @@ import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import app.gerardo.popularmovies2.API.MoviesApi;
+import app.gerardo.popularmovies2.data.DatabaseHelperOp;
 import app.gerardo.popularmovies2.data.MovieColumns;
 import app.gerardo.popularmovies2.data.MovieProvider;
-import app.gerardo.popularmovies2.data.ReviewColumns;
-import app.gerardo.popularmovies2.data.VideoColumns;
 import app.gerardo.popularmovies2.model.Movie;
 import app.gerardo.popularmovies2.model.MovieResult;
 import app.gerardo.popularmovies2.model.Review;
@@ -63,12 +60,13 @@ public class DetailsMovieActivityFragment extends Fragment implements LoaderMana
     private String mMovieStr;
     private CollapsingToolbarLayout collapsingToolbar;
     private ImageView header, mPoster;
-    private TextView mPopularityText, mVotesText, mDescriptionText, mDateText;
+    private TextView mMovieTitle, mPopularityText, mVotesText, mDescriptionText, mDateText;
     private Movie mMovie;
     private List<Review> mReviews;
     private List<Video> mVideos;
     private Uri mUri;
     private static final int DETAIL_LOADER = 0;
+    private String mMovieId;
 
     private AppCompatActivity appCompatActivity;
 
@@ -87,9 +85,6 @@ public class DetailsMovieActivityFragment extends Fragment implements LoaderMana
             MovieColumns.POPULARITY,
             MovieColumns.VOTE,
             MovieColumns.DATE
-
-
-
     };
 
 
@@ -116,23 +111,44 @@ public class DetailsMovieActivityFragment extends Fragment implements LoaderMana
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-
-
         // Inflate the layout for this fragment
         View rootView =  inflater.inflate(R.layout.fragment_details_movie, container, false);
         Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
         appCompatActivity = (AppCompatActivity) getActivity();
         appCompatActivity.setSupportActionBar(toolbar);
         appCompatActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+        // Adding title name
+        appCompatActivity.getSupportActionBar().setTitle("");
         collapsingToolbar = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsing_toolbar);
 
+        mMovieTitle = (TextView) rootView.findViewById(R.id.movie_label);
         header = (ImageView) rootView.findViewById(R.id.header_img_poster);
         mPoster = (ImageView) rootView.findViewById(R.id.img_poster);
         mPopularityText = (TextView) rootView.findViewById(R.id.popularity_data);
         mVotesText = (TextView) rootView.findViewById(R.id.votes_data);
         mDescriptionText = (TextView) rootView.findViewById(R.id.overview_data);
         mDateText = (TextView) rootView.findViewById(R.id.release_date_data);
+
+        final FloatingActionButton mFloatingButton = (FloatingActionButton) rootView.findViewById(R.id.fab);
+        mFloatingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Cursor movie = getActivity().getContentResolver().query(MovieProvider.Movies.withId(mMovie.getId()),
+                        null, null, null, null);
+                if(movie.getCount() == 0) {
+                    mFloatingButton.setColorFilter(0xffffffff, PorterDuff.Mode.MULTIPLY);
+                    DatabaseHelperOp.insertMovie(mMovie, getActivity());
+
+                }
+                else {
+                    mFloatingButton.setColorFilter(0xffff0000, PorterDuff.Mode.MULTIPLY);
+
+                }
+
+                movie.close();
+
+            }
+        });
 
         Intent intent = getActivity().getIntent();
         Bundle arguments = getArguments();
@@ -150,12 +166,10 @@ public class DetailsMovieActivityFragment extends Fragment implements LoaderMana
             }
             else if(arguments.containsKey(GeneralConst.MOVIE_URI)) {
                 mUri = arguments.getParcelable(GeneralConst.MOVIE_URI);
-                Log.d("URI", "ok");
             }
         }
-        else if(intent.getData() != null){
+        else if(intent.getData() != null) {
             mUri = intent.getData();
-            Log.d("URI", "ok");
         }
         else {
             getFirstMovie();
@@ -205,8 +219,8 @@ public class DetailsMovieActivityFragment extends Fragment implements LoaderMana
         String mOverView = mMovie.getOverview();
         String date = mMovie.getReleaseDate();
 
-        // Adding title name
-        appCompatActivity.getSupportActionBar().setTitle(mMovie.getTitle());
+        // Adding title
+        mMovieTitle.setText(mMovie.getTitle());
         // Adding image with Picasso and changing color to status bar and collapse
         Picasso.with(getActivity()).load("http://image.tmdb.org/t/p/w500//" + mImageBack).into(header);
         // Adding image with Picasso and changing color to status bar and collapse
@@ -310,95 +324,6 @@ public class DetailsMovieActivityFragment extends Fragment implements LoaderMana
 
     }
 
-    private void insertMovie() {
-        Log.d(LOG_TAG, "insert");
-        ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>();
-
-        ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(
-                MovieProvider.Movies.CONTENT_URI);
-        builder.withValue(MovieColumns._ID, mMovie.getId());
-        builder.withValue(MovieColumns.TITLE, mMovie.getTitle());
-        builder.withValue(MovieColumns.DESCRIPTION, mMovie.getOverview());
-        builder.withValue(MovieColumns.BACK_POSTER, mMovie.getBackdropPath());
-        builder.withValue(MovieColumns.POSTER, mMovie.getPosterPath());
-        builder.withValue(MovieColumns.POPULARITY, mMovie.getPopularity());
-        builder.withValue(MovieColumns.VOTE, mMovie.getVoteAverage());
-        builder.withValue(MovieColumns.DATE, mMovie.getReleaseDate());
-
-        batchOperations.add(builder.build());
-
-
-        try {
-            getActivity().getContentResolver().applyBatch(MovieProvider.AUTHORITY, batchOperations);
-        } catch (RemoteException | OperationApplicationException e) {
-
-            Log.e(LOG_TAG, "Error applying batch insert", e);
-        }
-
-    }
-
-    private void deleteMovie() {
-        Log.d(LOG_TAG, "delete");
-        ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>();
-
-        ContentProviderOperation.Builder builder = ContentProviderOperation.newDelete(
-                MovieProvider.Movies.CONTENT_URI);
-        builder.withValue(MovieColumns._ID, mMovie.getId());
-        builder.withValue(MovieColumns.TITLE, mMovie.getTitle());
-        builder.withValue(MovieColumns.DESCRIPTION, mMovie.getOverview());
-        builder.withValue(MovieColumns.BACK_POSTER, mMovie.getBackdropPath());
-        builder.withValue(MovieColumns.POSTER, mMovie.getPosterPath());
-        builder.withValue(MovieColumns.POPULARITY, mMovie.getPopularity());
-        builder.withValue(MovieColumns.VOTE, mMovie.getVoteAverage());
-        builder.withValue(MovieColumns.DATE, mMovie.getReleaseDate());
-
-        batchOperations.add(builder.build());
-
-
-        try {
-            getActivity().getContentResolver().applyBatch(MovieProvider.AUTHORITY, batchOperations);
-        } catch (RemoteException | OperationApplicationException e) {
-
-            Log.e(LOG_TAG, "Error applying batch insert", e);
-        }
-    }
-
-    private void insertBulkReviews(ArrayList<ContentProviderOperation> batchOperations) {
-
-        for(Review review : mReviews) {
-            ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(
-                    MovieProvider.Reviews.CONTENT_URI);
-            builder.withValue(ReviewColumns._ID, review.getId());
-            builder.withValue(ReviewColumns.AUTHOR, review.getAuthor());
-            builder.withValue(ReviewColumns.CONTENT, review.getContent());
-            batchOperations.add(builder.build());
-        }
-
-        try {
-            getActivity().getContentResolver().applyBatch(MovieProvider.AUTHORITY, batchOperations);
-        } catch (RemoteException | OperationApplicationException e) {
-            Log.e(LOG_TAG, "Error applying batch insert", e);
-        }
-
-
-    }
-
-    private void insertBulkVideos(ArrayList<ContentProviderOperation> batchOperations) {
-        for(Video video : mVideos) {
-            ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(
-                    MovieProvider.Videos.CONTENT_URI);
-            builder.withValue(VideoColumns._ID, video.getKey());
-            builder.withValue(VideoColumns.NAME, video.getName());
-            batchOperations.add(builder.build());
-        }
-
-        try {
-            getActivity().getContentResolver().applyBatch(MovieProvider.AUTHORITY, batchOperations);
-        } catch (RemoteException | OperationApplicationException e) {
-            Log.e(LOG_TAG, "Error applying batch insert", e);
-        }
-    }
-
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_details_movie, menu);
@@ -408,7 +333,6 @@ public class DetailsMovieActivityFragment extends Fragment implements LoaderMana
 
         // Fetch and store ShareActionProvider
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
-
         if (mMovieStr != null) {
             mShareActionProvider.setShareIntent(createShareMoviesIntent());
         }
@@ -437,6 +361,8 @@ public class DetailsMovieActivityFragment extends Fragment implements LoaderMana
         if (data != null && data.moveToFirst()) {
             Log.d("onLoadFinished", "Create");
 
+            // Adding title
+            mMovieTitle.setText(data.getString(data.getColumnIndex(MovieColumns.TITLE)));
             // Adding image with Picasso and changing color to status bar and collapse
             Picasso.with(getActivity()).load("http://image.tmdb.org/t/p/w500//" + data.getString(
                     data.getColumnIndex(MovieColumns.BACK_POSTER)
