@@ -45,23 +45,48 @@ public class DatabaseHelperOp {
 
     }
 
-    public static void deleteMovie(Movie mMovie, Context context) {
+    public static void deleteMovie(long id, Context context) {
         Log.d(LOG_TAG, "delete");
         ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>();
 
         ContentProviderOperation.Builder builder = ContentProviderOperation.newDelete(
-                MovieProvider.Movies.CONTENT_URI);
-        builder.withValue(MovieColumns._ID, mMovie.getId());
-        builder.withValue(MovieColumns.TITLE, mMovie.getTitle());
-        builder.withValue(MovieColumns.DESCRIPTION, mMovie.getOverview());
-        builder.withValue(MovieColumns.BACK_POSTER, mMovie.getBackdropPath());
-        builder.withValue(MovieColumns.POSTER, mMovie.getPosterPath());
-        builder.withValue(MovieColumns.POPULARITY, mMovie.getPopularity());
-        builder.withValue(MovieColumns.VOTE, mMovie.getVoteAverage());
-        builder.withValue(MovieColumns.DATE, mMovie.getReleaseDate());
+                MovieProvider.Movies.withId(id));
 
         batchOperations.add(builder.build());
 
+        try {
+            context.getContentResolver().applyBatch(MovieProvider.AUTHORITY, batchOperations);
+        } catch (RemoteException | OperationApplicationException e) {
+
+            Log.e(LOG_TAG, "Error applying batch insert", e);
+        }
+    }
+
+    public static void deleteBulkReviews(long id, Context context) {
+        Log.d(LOG_TAG, "delete");
+        ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>();
+
+        ContentProviderOperation.Builder builder = ContentProviderOperation.newDelete(
+                MovieProvider.Reviews.withId(id));
+
+        batchOperations.add(builder.build());
+
+        try {
+            context.getContentResolver().applyBatch(MovieProvider.AUTHORITY, batchOperations);
+        } catch (RemoteException | OperationApplicationException e) {
+
+            Log.e(LOG_TAG, "Error applying batch insert", e);
+        }
+    }
+
+    public static void deleteBulkTrailers(Long id, Context context) {
+        Log.d(LOG_TAG, "delete");
+        ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>();
+
+        ContentProviderOperation.Builder builder = ContentProviderOperation.newDelete(
+                MovieProvider.Videos.withId(id));
+
+        batchOperations.add(builder.build());
 
         try {
             context.getContentResolver().applyBatch(MovieProvider.AUTHORITY, batchOperations);

@@ -106,7 +106,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
         AppCompatActivity appCompatActivity = (AppCompatActivity) getActivity();
         appCompatActivity.setSupportActionBar(toolbar);
 
-        // Get reference of gridview
+        // Get reference of recycler view
         recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerview);
         setupRecyclerView();
         return rootView;

@@ -7,7 +7,8 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
 /**
- * Written by sam_chordas on 8/11/15.
+ * Created by Gerardo de la Rosa on 8/11/15.
+ * Credit to Sam_chordas https://github.com/schordas/SchematicPlanets/tree/master
  * Credit to skyfishjy gist:
  *    https://gist.github.com/skyfishjy/443b7448f59be978bc59
  * for the CursorRecyclerViewApater.java file

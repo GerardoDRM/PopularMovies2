@@ -7,6 +7,10 @@ import net.simonvt.schematic.annotation.References;
 
 /**
  * Created by Gerardo de la Rosa on 25/10/15.
+ * Credit to SimonVT https://github.com/SimonVT/schematic
+ * This app use schematic library to create the content provider
+ * it's a simple solution but it has a lot limitations, specially on
+ * database actions
  */
 public interface ReviewColumns {
     @DataType(DataType.Type.TEXT) @PrimaryKey

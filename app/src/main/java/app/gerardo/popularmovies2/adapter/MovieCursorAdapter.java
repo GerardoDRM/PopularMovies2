@@ -19,6 +19,8 @@ import app.gerardo.popularmovies2.data.MovieProvider;
 
 /**
  * Created by Gerardo de la Rosa on 8/11/15.
+ * Credit to Sam_chordas https://github.com/schordas/SchematicPlanets/tree/master
+ * for all bases
  */
 public class MovieCursorAdapter extends CursorRecyclerViewAdapter<MovieCursorAdapter.ViewHolder> {
 

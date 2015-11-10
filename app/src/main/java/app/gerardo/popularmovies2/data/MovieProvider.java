@@ -9,6 +9,10 @@ import net.simonvt.schematic.annotation.TableEndpoint;
 
 /**
  * Created by Gerardo de la Rosa on 19/10/15.
+ * Credit to SimonVT https://github.com/SimonVT/schematic
+ * This app use schematic library to create the content provider
+ * it's a simple solution but it has a lot limitations, specially on
+ * database actions
  */
 
 @ContentProvider(authority = MovieProvider.AUTHORITY, database = MovieDatabase.class)
